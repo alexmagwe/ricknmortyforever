@@ -36,9 +36,13 @@ const getProvider = () => {
 
 const showPlatformAlert = () => {
   if (navigator.userAgent.match(/chrome|chromium|crios/i)) {
-    alert(`please install phantom chrome wallet extension ,${phantomChromeLink} 👻`);
+    alert(
+      `please install phantom chrome wallet extension ,${phantomChromeLink} 👻`
+    );
   } else if (navigator.userAgent.match(/firefox|fxios/i)) {
-    alert(`please install phantom firefox wallet extension ,${phantomMozLink} 👻`);
+    alert(
+      `please install phantom firefox wallet extension ,${phantomMozLink} 👻`
+    );
   }
 };
 const App = () => {
@@ -115,12 +119,12 @@ const App = () => {
         }
       } else {
         showPlatformAlert();
-
         alert("please install phantom wallet extension 👻");
       }
     } catch (error) {
       console.error(error);
-      alert(error.message)
+      setLoading(false);
+      // alert(error.message)
     }
   };
   const getProgram = async () => {
