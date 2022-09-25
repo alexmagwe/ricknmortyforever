@@ -6,15 +6,19 @@ import { Program, Provider, web3 } from "@project-serum/anchor";
 import GifGrid from "./components/gifGrid";
 import AddGif from "./components/AddGif";
 import { Blocks } from "react-loader-spinner";
-import kp from './keypair.json'
+import kp from "./keypair.json";
 // Constants
 const { SystemProgram } = web3;
 const TWITTER_HANDLE = "_buildspace";
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 
-const arr = Object.values(kp._keypair.secretKey)
-const secret = new Uint8Array(arr)
-const baseAccount = web3.Keypair.fromSecretKey(secret) 
+const arr = Object.values(kp._keypair.secretKey);
+const secret = new Uint8Array(arr);
+const phantomMozLink =
+  "https://addons.mozilla.org/en-US/firefox/addon/phantom-app/";
+const phantomChromeLink =
+  "https://chrome.google.com/webstore/detail/phantom/bfnaelmomeimhlpmgjnjophhpkkoljpa";
+const baseAccount = web3.Keypair.fromSecretKey(secret);
 const network = clusterApiUrl("devnet");
 const programId = new PublicKey(process.env.REACT_APP_DEVNET_PROGRAM_ID);
 const opts = {
@@ -29,15 +33,17 @@ const getProvider = () => {
   );
   return provider;
 };
-const TEST_GIFS = [
-  "https://media.giphy.com/media/l378BzHA5FwWFXVSg/giphy.gif",
-  "https://media.giphy.com/media/gk3R16JhLP8RUka2nD/giphy.gif",
-  "https://media.giphy.com/media/RhNRsZgfkjzX3KzKyh/giphy.gif",
-  "https://media.giphy.com/media/MaP59uYFYg66yHXK7h/giphy.gif",
-];
+
+const showPlatformAlert = () => {
+  if (navigator.userAgent.match(/chrome|chromium|crios/i)) {
+    alert(`please install phantom chrome wallet extension ,${phantomChromeLink} 👻`);
+  } else if (navigator.userAgent.match(/firefox|fxios/i)) {
+    alert(`please install phantom firefox wallet extension ,${phantomMozLink} 👻`);
+  }
+};
 const App = () => {
   const [walletAddress, setWalletAddress] = useState("");
-  const [gifs, setGifs] = useState(null);
+  const [gifs, setGifs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const getGifList = useCallback(async () => {
@@ -46,16 +52,13 @@ const App = () => {
       const account = await program.account.baseAccount.fetch(
         baseAccount.publicKey
       );
-      console.log("Got the account", account);
       setGifs(account.gifList);
       setLoading(false);
     } catch (err) {
-      // alert(err);
-      // setGifs(null);
+      setGifs(null);
       setLoading(false);
     }
   }, []);
-
   const createAccount = useCallback(async () => {
     setLoading(true);
     try {
@@ -70,10 +73,10 @@ const App = () => {
         },
         signers: [baseAccount],
       });
-      console.log(
-        "Created a new BaseAccount w/ address:",
-        baseAccount.publicKey.toString()
-      );
+      // console.log(
+      //   "Created a new BaseAccount w/ address:",
+      //   baseAccount.publicKey.toString()
+      // );
 
       await getGifList();
     } catch (err) {
@@ -91,7 +94,7 @@ const App = () => {
           accounts: {
             baseAccount: baseAccount.publicKey,
             user: provider.wallet.publicKey,
-          }
+          },
         });
         await getGifList();
       } catch (err) {
@@ -105,19 +108,19 @@ const App = () => {
       if (solana) {
         if (solana.isPhantom) {
           // setWallet(solana)
-          console.log("phantom wallet installed");
           const response = await solana.connect({ onlyIfTrusted: true });
           setWalletAddress(response.publicKey.toString());
-          console.log(
-            "Connected with public key",
-            response.publicKey.toString()
-          );
         } else {
-          alert("please install phantom wallet extension 👻");
+          showPlatformAlert();
         }
+      } else {
+        showPlatformAlert();
+
+        alert("please install phantom wallet extension 👻");
       }
     } catch (error) {
       console.error(error);
+      alert(error.message)
     }
   };
   const getProgram = async () => {
@@ -129,7 +132,6 @@ const App = () => {
     const { solana } = window;
     if (solana) {
       const response = await solana.connect();
-      console.log(response);
       if (response.publicKey) {
         setWalletAddress(response.publicKey.toString());
       }
@@ -145,7 +147,6 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    console.log('running ')
     if (walletAddress) {
       // setGifs(TEST_GIFS);
       getGifList();
@@ -186,7 +187,7 @@ const App = () => {
               </button>
             )
           ) : (
-            <div className='grid-container'>
+            <div className="grid-container">
               {walletAddress && <AddGif addGif={addGif} />}
               {walletAddress && <GifGrid gifs={gifs} />}
             </div>
