@@ -6,19 +6,19 @@ import { Program, Provider, web3 } from "@project-serum/anchor";
 import GifGrid from "./components/gifGrid";
 import AddGif from "./components/AddGif";
 import { Blocks } from "react-loader-spinner";
-import kp from "./keypair.json";
 // Constants
 const { SystemProgram } = web3;
 const TWITTER_HANDLE = "_buildspace";
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 
+const kp = JSON.parse(process.env.REACT_APP_ACCOUNT_KEYPAIR);
 const arr = Object.values(kp._keypair.secretKey);
 const secret = new Uint8Array(arr);
+const baseAccount = web3.Keypair.fromSecretKey(secret);
 const phantomMozLink =
   "https://addons.mozilla.org/en-US/firefox/addon/phantom-app/";
 const phantomChromeLink =
   "https://chrome.google.com/webstore/detail/phantom/bfnaelmomeimhlpmgjnjophhpkkoljpa";
-const baseAccount = web3.Keypair.fromSecretKey(secret);
 const network = clusterApiUrl("devnet");
 const programId = new PublicKey(process.env.REACT_APP_DEVNET_PROGRAM_ID);
 const opts = {
